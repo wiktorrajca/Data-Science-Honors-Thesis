@@ -1,0 +1,7 @@
+The data was collected by Dennis Demirtas, James Hu and Yeonwoo Son, undergraduate students at UC Berkeley that I help with data analysis.
+
+This is the first batch of data that contains video recordings and recorded time series of joint angles while performing Fugl Meyer physical test. In the future we will collect more data for the purpose of this thesis.  The data was gathered using Oculus Quest 3 that ran a Unity program that we were authors of. On top of that while recording the data, we set up a go pro camera to capture the real movement on video.
+
+In the future we will collect more data for the purpose of this thesis. We will record it the same way as before. However, we are still improving the recording of time series data of joint angles, so that might change in the future.
+
+While the data is enough to figure out the inherent measurement errors of Oculus Quest 3 device, the movement data is collected by us mimicking patient affected by stroke. Therefore our movements might not grasp the whole range of different ways a stroke patient might compensate movement. Yet, it is well documented the most common ways to violate the Fugl Meyer exam. Our dataset might not be enough for outlier cases.  This data is not yet licensed we created it.
