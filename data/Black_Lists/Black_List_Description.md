@@ -10,7 +10,7 @@ These datasets originate from various international regulatory bodies and financ
 - **Description:**  
   A blacklist of individuals and companies banned by the Bureau of Industry and Security (BIS) for violating U.S. export laws. American companies are prohibited from engaging with any entity on this list.
 - **Link:**  
-  [Inter-American Development Bank Sanctions Data](#) 
+  [Denied Person List](https://www.bis.doc.gov/index.php/policy-guidance/lists-of-parties-of-concern/denied-persons-list) 
 - **File Format:**  
   `.txt` (requires extra preprocessing to extract structured data)
 - **Notes:**  
