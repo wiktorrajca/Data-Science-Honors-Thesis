@@ -108,3 +108,122 @@ def analyze_flagged_procurements(G, flagged_shareholders):
                     flagged_procurements.add(procurement)
 
     return list(flagged_procurements)
+
+
+
+import networkx as nx
+import pandas as pd
+import os
+
+GRAPH_FILE = "procurement_graph.graphml"  # Stored as GraphML for visualization & reusability
+
+def load_or_initialize_graph():
+    """
+    Loads an existing graph from GraphML if available, otherwise initializes a new one.
+    """
+    if os.path.exists(GRAPH_FILE):
+        print(f"✅ Loading existing graph from {GRAPH_FILE}...")
+        return nx.read_graphml(GRAPH_FILE)
+    
+    print("🔍 Creating a new graph...")
+    return nx.DiGraph()  # Initialize empty graph
+
+def save_graph(G):
+    """
+    Saves the graph to GraphML format.
+    """
+    nx.write_graphml(G, GRAPH_FILE)
+    print(f"✅ Graph saved to {GRAPH_FILE}")
+
+def add_procurement_winners(G, procurement_csv):
+    """
+    Adds procurement-winning companies to the graph as 'bid_winners' and stores extra node information.
+    """
+    print(f"🔍 Loading procurement data from {procurement_csv}...")
+    procurement_df = pd.read_csv(procurement_csv)
+
+    for index, row in procurement_df.iterrows():
+        procurement_id = f"procurement_{index}"  # Use index as unique ID
+        company_id = str(row['bvdidnumber'])  # Company ID
+
+        # Store full row data as node attributes
+        company_attributes = row.to_dict()
+        company_attributes["type"] = "Company"
+        company_attributes["bid_winner"] = True  # Mark as procurement winner
+
+        procurement_attributes = {"type": "Procurement"}
+
+        # Add procurement node with full details
+        G.add_node(procurement_id, **procurement_attributes)
+
+        # Add company node with full row data
+        G.add_node(company_id, **company_attributes)
+
+        # Create edge: Company won Procurement
+        G.add_edge(company_id, procurement_id, relationship='WON')
+
+    print("✅ Added procurement winners to the graph with full metadata.")
+
+    print("✅ Added procurement winners to the graph.")
+
+def add_matching_entities(G, data_csv, source_column, target_column, relationship_type):
+    """
+    Adds nodes and edges to the graph only if the `source_column` matches an existing node.
+    Also stores full row data for each new node.
+    """
+    print(f"🔍 Loading {relationship_type} data from {data_csv}...")
+    df = pd.read_csv(data_csv)
+
+    for _, row in df.iterrows():
+        source_id = str(row[source_column])
+        target_id = str(row[target_column])
+
+        # Only add if the source is already in the graph (ensuring relevant connections)
+        if source_id in G:
+            node_attributes = row.to_dict()  # Store all row data
+            node_attributes["type"] = "Company"
+
+            # Add target node with all available metadata
+            G.add_node(target_id, **node_attributes)
+
+            # Create relationship edge
+            G.add_edge(source_id, target_id, relationship=relationship_type)
+
+    print(f"✅ Added {relationship_type} relationships with metadata.")
+
+def expand_graph(G, shareholders_csv, subsidiaries_csv, controlling_shareholders_csv, depth=1):
+    """
+    Expands the graph with ownership structures, only adding entities related to procurement winners.
+    Depth allows adding deeper connections.
+    """
+    print(f"🔄 Expanding graph with depth={depth}...")
+
+    # Add direct ownership relationships
+    add_matching_entities(G, shareholders_csv, "bvdidnumber", "shareholderbvdidnumber", "OWNS")
+    add_matching_entities(G, subsidiaries_csv, "subsidiarybvdidnumber", "bvdidnumber", "SUBSIDIARY_OF")
+    add_matching_entities(G, controlling_shareholders_csv, "bvdidnumber", "guobvdidnumber", "CONTROLS")
+
+    if depth > 1:
+        print("🔄 Expanding to deeper levels (e.g., shareholders of shareholders)...")
+
+        # Expand to shareholders of shareholders
+        add_matching_entities(G, shareholders_csv, "shareholder_bvdid", "ultimate_shareholder_bvdid", "OWNS")
+
+        # Expand to subsidiaries of subsidiaries
+        add_matching_entities(G, subsidiaries_csv, "parent_bvdid", "ultimate_parent_bvdid", "SUBSIDIARY_OF")
+
+    print(f"✅ Graph expansion complete (depth={depth}).")
+
+def analyze_flagged_procurements(G, flagged_shareholders):
+    """
+    Identifies procurements won by companies that have at least one flagged shareholder.
+    """
+    flagged_procurements = set()
+
+    for shareholder in flagged_shareholders:
+        if G.has_node(shareholder):
+            for company in G.successors(shareholder):  # Shareholder → Company
+                for procurement in G.successors(company):  # Company → Procurement
+                    flagged_procurements.add(procurement)
+
+    return list(flagged_procurements)

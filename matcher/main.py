@@ -1,4 +1,10 @@
-from graph_builder import initialize_graph_from_csvs, analyze_flagged_procurements
+from graph_builder import (
+    load_or_initialize_graph, 
+    save_graph, 
+    add_procurement_winners, 
+    expand_graph, 
+    analyze_flagged_procurements
+)
 
 def main():
     # Define paths to CSV files
@@ -8,13 +14,21 @@ def main():
     first_level_shareholders_csv = "/Users/wiktorrajca/Desktop/Research/URAP_Fedyk/data/Orbis_Data/shareholders_first_level1.csv"
     controlling_shareholders_csv = "/Users/wiktorrajca/Desktop/Research/URAP_Fedyk/data/Orbis_Data/controlling_shareholders1.csv"
 
-    # Step 1: Load the graph (either from disk or create a new one)
-    G = initialize_graph_from_csvs(procurement_csv, shareholders_csv, subsidiaries_csv, first_level_shareholders_csv, controlling_shareholders_csv)
+    # Step 1: Load existing graph or create a new one
+    G = load_or_initialize_graph()
 
-    # Step 2: Define flagged shareholders (from a sanctions list, database, etc.)
+    # Step 2: Add procurement winners (only if they are not already present)
+    if not any(G.nodes[n].get("bid_winner") for n in G.nodes):
+        add_procurement_winners(G, procurement_csv)
+
+    # Step 3: Expand the graph with additional ownership layers
+    expand_graph(G, first_level_shareholders_csv, subsidiaries_csv, shareholders_csv, depth=1)
+
+    # Step 4: Save the updated graph
+    save_graph(G)
+
+    # Step 5: Analyze flagged shareholders
     flagged_shareholders = {"JP3430003015395", "SE*110357629864"}
-
-    # Step 3: Find procurements linked to flagged shareholders
     flagged_procurements = analyze_flagged_procurements(G, flagged_shareholders)
 
     print("\n⚠️ Procurements linked to flagged shareholders:", flagged_procurements)
