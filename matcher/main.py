@@ -4,17 +4,16 @@ from graph_builder import (
     save_graph, 
     add_procurement_winners, 
     expand_graph, 
-    analyze_flagged_procurements,
-    add_flagged_entities
+    add_flagged_entities,
+    add_procurement_winners
 )
 
 def loading_creating(procurement_csv, country, first_level_shareholders_csv, subsidiaries_csv, shareholders_csv, flagged_csv, depth=1):
     # Step 1: Load existing graph or create a new one
     G = load_or_initialize_graph(country)
 
-    # Step 2: Add procurement winners (only if they are not already present)
-    if not any(G.nodes[n].get("bid_winner") for n in G.nodes):
-        add_procurement_winners(G, country, procurement_csv)
+    # Step 2: Add procurement winners 
+    add_procurement_winners(G, country, procurement_csv)
 
     # Step 3: Expand the graph with additional ownership layers
     expand_graph(G, first_level_shareholders_csv, subsidiaries_csv, shareholders_csv, depth)

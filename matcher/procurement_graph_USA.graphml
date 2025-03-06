@@ -1,0 +1,172 @@
+<?xml version='1.0' encoding='utf-8'?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+  <key id="d79" for="edge" attr.name="relationship" attr.type="string" />
+  <key id="d78" for="node" attr.name="bid_winner" attr.type="string" />
+  <key id="d77" for="node" attr.name="bvdidnumber" attr.type="string" />
+  <key id="d76" for="node" attr.name="name" attr.type="string" />
+  <key id="d75" for="node" attr.name="DT_AWARD" attr.type="string" />
+  <key id="d74" for="node" attr.name="B_SUBCONTRACTED" attr.type="string" />
+  <key id="d73" for="node" attr.name="AWARD_VALUE_EURO_FIN_1" attr.type="string" />
+  <key id="d72" for="node" attr.name="AWARD_VALUE_EURO" attr.type="string" />
+  <key id="d71" for="node" attr.name="AWARD_EST_VALUE_EURO" attr.type="string" />
+  <key id="d70" for="node" attr.name="NUMBER_OFFERS_ELECTR" attr.type="string" />
+  <key id="d69" for="node" attr.name="NUMBER_TENDERS_NON_EU" attr.type="string" />
+  <key id="d68" for="node" attr.name="NUMBER_TENDERS_OTHER_EU" attr.type="string" />
+  <key id="d67" for="node" attr.name="NUMBER_TENDERS_SME" attr.type="string" />
+  <key id="d66" for="node" attr.name="NUMBER_OFFERS" attr.type="string" />
+  <key id="d65" for="node" attr.name="TITLE" attr.type="string" />
+  <key id="d64" for="node" attr.name="CONTRACT_NUMBER" attr.type="string" />
+  <key id="d63" for="node" attr.name="B_CONTRACTOR_SME" attr.type="string" />
+  <key id="d62" for="node" attr.name="WIN_COUNTRY_CODE" attr.type="string" />
+  <key id="d61" for="node" attr.name="WIN_POSTAL_CODE" attr.type="string" />
+  <key id="d60" for="node" attr.name="WIN_TOWN" attr.type="string" />
+  <key id="d59" for="node" attr.name="WIN_ADDRESS" attr.type="string" />
+  <key id="d58" for="node" attr.name="WIN_NATIONALID" attr.type="string" />
+  <key id="d57" for="node" attr.name="WIN_NAME" attr.type="string" />
+  <key id="d56" for="node" attr.name="B_AWARDED_TO_A_GROUP" attr.type="string" />
+  <key id="d55" for="node" attr.name="INFO_UNPUBLISHED" attr.type="string" />
+  <key id="d54" for="node" attr.name="INFO_ON_NON_AWARD" attr.type="string" />
+  <key id="d53" for="node" attr.name="ID_LOT_AWARDED" attr.type="string" />
+  <key id="d52" for="node" attr.name="ID_AWARD" attr.type="string" />
+  <key id="d51" for="node" attr.name="NUMBER_AWARDS" attr.type="string" />
+  <key id="d50" for="node" attr.name="B_ELECTRONIC_AUCTION" attr.type="string" />
+  <key id="d49" for="node" attr.name="CRIT_WEIGHTS" attr.type="string" />
+  <key id="d48" for="node" attr.name="CRIT_CRITERIA" attr.type="string" />
+  <key id="d47" for="node" attr.name="CRIT_PRICE_WEIGHT" attr.type="string" />
+  <key id="d46" for="node" attr.name="CRIT_CODE" attr.type="string" />
+  <key id="d45" for="node" attr.name="OUT_OF_DIRECTIVES" attr.type="string" />
+  <key id="d44" for="node" attr.name="B_ACCELERATED" attr.type="string" />
+  <key id="d43" for="node" attr.name="TOP_TYPE" attr.type="string" />
+  <key id="d42" for="node" attr.name="B_EU_FUNDS" attr.type="string" />
+  <key id="d41" for="node" attr.name="VALUE_EURO_FIN_2" attr.type="string" />
+  <key id="d40" for="node" attr.name="VALUE_EURO_FIN_1" attr.type="string" />
+  <key id="d39" for="node" attr.name="VALUE_EURO" attr.type="string" />
+  <key id="d38" for="node" attr.name="LOTS_NUMBER" attr.type="string" />
+  <key id="d37" for="node" attr.name="GPA_COVERAGE" attr.type="string" />
+  <key id="d36" for="node" attr.name="B_GPA" attr.type="string" />
+  <key id="d35" for="node" attr.name="ADDITIONAL_CPVS" attr.type="string" />
+  <key id="d34" for="node" attr.name="ID_LOT" attr.type="string" />
+  <key id="d33" for="node" attr.name="MAIN_CPV_CODE_GPA" attr.type="string" />
+  <key id="d32" for="node" attr.name="CPV" attr.type="string" />
+  <key id="d31" for="node" attr.name="B_DYN_PURCH_SYST" attr.type="string" />
+  <key id="d30" for="node" attr.name="B_FRA_CONTRACT" attr.type="string" />
+  <key id="d29" for="node" attr.name="FRA_ESTIMATED" attr.type="string" />
+  <key id="d28" for="node" attr.name="B_FRA_AGREEMENT" attr.type="string" />
+  <key id="d27" for="node" attr.name="TAL_LOCATION_NUTS" attr.type="string" />
+  <key id="d26" for="node" attr.name="TYPE_OF_CONTRACT" attr.type="string" />
+  <key id="d25" for="node" attr.name="B_AWARDED_BY_CENTRAL_BODY" attr.type="string" />
+  <key id="d24" for="node" attr.name="B_INVOLVES_JOINT_PROCUREMENT" attr.type="string" />
+  <key id="d23" for="node" attr.name="B_ON_BEHALF" attr.type="string" />
+  <key id="d22" for="node" attr.name="MAIN_ACTIVITY" attr.type="string" />
+  <key id="d21" for="node" attr.name="EU_INST_CODE" attr.type="string" />
+  <key id="d20" for="node" attr.name="CAE_TYPE" attr.type="string" />
+  <key id="d19" for="node" attr.name="ISO_COUNTRY_CODE_ALL" attr.type="string" />
+  <key id="d18" for="node" attr.name="B_MULTIPLE_COUNTRY" attr.type="string" />
+  <key id="d17" for="node" attr.name="ISO_COUNTRY_CODE_GPA" attr.type="string" />
+  <key id="d16" for="node" attr.name="ISO_COUNTRY_CODE" attr.type="string" />
+  <key id="d15" for="node" attr.name="CAE_GPA_ANNEX" attr.type="string" />
+  <key id="d14" for="node" attr.name="CAE_POSTAL_CODE" attr.type="string" />
+  <key id="d13" for="node" attr.name="CAE_TOWN" attr.type="string" />
+  <key id="d12" for="node" attr.name="CAE_ADDRESS" attr.type="string" />
+  <key id="d11" for="node" attr.name="CAE_NATIONALID" attr.type="string" />
+  <key id="d10" for="node" attr.name="CAE_NAME" attr.type="string" />
+  <key id="d9" for="node" attr.name="B_MULTIPLE_CAE" attr.type="string" />
+  <key id="d8" for="node" attr.name="CORRECTIONS" attr.type="string" />
+  <key id="d7" for="node" attr.name="CANCELLED" attr.type="string" />
+  <key id="d6" for="node" attr.name="XSD_VERSION" attr.type="string" />
+  <key id="d5" for="node" attr.name="DT_DISPATCH" attr.type="string" />
+  <key id="d4" for="node" attr.name="ID_TYPE" attr.type="string" />
+  <key id="d3" for="node" attr.name="YEAR" attr.type="string" />
+  <key id="d2" for="node" attr.name="TED_NOTICE_URL" attr.type="string" />
+  <key id="d1" for="node" attr.name="ID_NOTICE_CAN" attr.type="string" />
+  <key id="d0" for="node" attr.name="type" attr.type="string" />
+  <graph edgedefault="directed">
+    <node id="procurement_1fb0011037">
+      <data key="d0">Procurement</data>
+    </node>
+    <node id="UA33450993">
+      <data key="d1">2019194900</data>
+      <data key="d2">ted.europa.eu/udl?uri=TED:NOTICE:194900-2019:TEXT:EN:HTML</data>
+      <data key="d3">2019</data>
+      <data key="d4">3</data>
+      <data key="d5">23/04/19</data>
+      <data key="d6">R209.S3</data>
+      <data key="d7">0</data>
+      <data key="d8">0</data>
+      <data key="d9">N</data>
+      <data key="d10">Politecnico di Torino</data>
+      <data key="d11">Unknown</data>
+      <data key="d12">Corso Duca degli Abruzzi 24</data>
+      <data key="d13">Torino</data>
+      <data key="d14">10129</data>
+      <data key="d15">A2   </data>
+      <data key="d16">IT</data>
+      <data key="d17">IT</data>
+      <data key="d18">N</data>
+      <data key="d19">Unknown</data>
+      <data key="d20">8</data>
+      <data key="d21">Unknown</data>
+      <data key="d22">Education</data>
+      <data key="d23">N</data>
+      <data key="d24">N</data>
+      <data key="d25">N</data>
+      <data key="d26">U</data>
+      <data key="d27">ITC11</data>
+      <data key="d28">N</data>
+      <data key="d29">Unknown</data>
+      <data key="d30">N</data>
+      <data key="d31">N</data>
+      <data key="d32">44164200</data>
+      <data key="d33">44164</data>
+      <data key="d34">Unknown</data>
+      <data key="d35">Unknown</data>
+      <data key="d36">Y</data>
+      <data key="d37">1</data>
+      <data key="d38">1.0</data>
+      <data key="d39">250312.5</data>
+      <data key="d40">250312.5</data>
+      <data key="d41">250312.5</data>
+      <data key="d42">N</data>
+      <data key="d43">NOC</data>
+      <data key="d44">Unknown</data>
+      <data key="d45">0</data>
+      <data key="d46">L</data>
+      <data key="d47">Unknown</data>
+      <data key="d48">Unknown</data>
+      <data key="d49">Unknown</data>
+      <data key="d50">N</data>
+      <data key="d51">1</data>
+      <data key="d52">10443917.0</data>
+      <data key="d53">Unknown</data>
+      <data key="d54">Unknown</data>
+      <data key="d55">N</data>
+      <data key="d56">N</data>
+      <data key="d57">T.E.A.M. Inc.</data>
+      <data key="d58">Unknown</data>
+      <data key="d59">Unknown</data>
+      <data key="d60">Columbus - Ohio</data>
+      <data key="d61">Unknown</data>
+      <data key="d62">US</data>
+      <data key="d63">N</data>
+      <data key="d64">Unknown</data>
+      <data key="d65">Fornitura di prototipi tubolari in materiale composito o in fibre di vetro — CIG 7853789FB2</data>
+      <data key="d66">1.0</data>
+      <data key="d67">0.0</data>
+      <data key="d68">Unknown</data>
+      <data key="d69">1.0</data>
+      <data key="d70">Unknown</data>
+      <data key="d71">250312.5</data>
+      <data key="d72">250312.5</data>
+      <data key="d73">250312.5</data>
+      <data key="d74">N</data>
+      <data key="d75">16/04/19</data>
+      <data key="d76">Team</data>
+      <data key="d77">UA33450993</data>
+      <data key="d0">Company</data>
+      <data key="d78">True</data>
+    </node>
+    <edge source="UA33450993" target="procurement_1fb0011037">
+      <data key="d79">WON</data>
+    </edge>
+  </graph>
+</graphml>

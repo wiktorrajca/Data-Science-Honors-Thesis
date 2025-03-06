@@ -2,96 +2,7 @@ import networkx as nx
 import pandas as pd
 import os
 import pickle
-
-# GRAPH_FILE = "procurement_graph.pkl"  # File where the graph is stored
-
-# def initialize_graph_from_csvs(procurement_csv, shareholders_csv, subsidiaries_csv, first_level_shareholders_csv, controlling_shareholders_csv):
-#     """
-#     Builds and saves a directed graph from procurement, shareholder, and subsidiary data.
-#     If the graph already exists, it loads it instead of rebuilding.
-#     """
-
-#     # Check if the graph already exists
-#     if os.path.exists(GRAPH_FILE):
-#         print(f"✅ Loading existing graph from {GRAPH_FILE}...")
-#         with open(GRAPH_FILE, "rb") as f:
-#             return pickle.load(f)
-
-#     print("🔍 Creating a new graph...")
-#     G = nx.DiGraph()
-
-#     # Step 1: Load procurement matches
-#     print(f"🔍 Loading procurement data from {procurement_csv}...")
-#     procurement_df = pd.read_csv(procurement_csv)
-
-#     for index, row in procurement_df.iterrows():
-#         procurement_id = index  # Use the row index as the ID
-#         company_id = str(row['bvdidnumber'])  # Company ID
-
-#         # Add nodes
-#         G.add_node(procurement_id, type='Procurement')
-#         G.add_node(company_id, type='Company')
-
-#         # Create edge: Company won Procurement
-#         G.add_edge(company_id, procurement_id, relationship='WON')
-
-#     # Step 2: Load shareholder matches
-#     print(f"🔍 Loading shareholder data from {shareholders_csv}...")
-#     shareholders_df = pd.read_csv(shareholders_csv)
-
-#     for _, row in shareholders_df.iterrows():
-#         shareholder_id = str(row['guobvdidnumber'])
-#         company_id = str(row['bvdidnumber'])
-
-#         if shareholder_id != company_id:
-#             G.add_node(shareholder_id, type='Shareholder')
-#             G.add_edge(shareholder_id, company_id, relationship='OWNS')
-
-#     # Step 3: Load subsidiaries data
-#     print(f"🔍 Loading subsidiaries data from {subsidiaries_csv}...")
-#     subsidiaries_df = pd.read_csv(subsidiaries_csv)
-
-#     for _, row in subsidiaries_df.iterrows():
-#         parent_id = str(row['bvdidnumber'])
-#         subsidiary_id = str(row['subsidiarybvdidnumber'])
-
-#         if parent_id != subsidiary_id:
-#             G.add_node(parent_id, type='Company')
-#             G.add_node(subsidiary_id, type='Company')
-#             G.add_edge(parent_id, subsidiary_id, relationship='SUBSIDIARY_OF')
-
-#     # Step 4: Load first-level shareholders data
-#     print(f"🔍 Loading first-level shareholders data from {first_level_shareholders_csv}...")
-#     first_level_df = pd.read_csv(first_level_shareholders_csv)
-
-#     for _, row in first_level_df.iterrows():
-#         shareholder_id = str(row['shareholderbvdidnumber'])
-#         company_id = str(row['bvdidnumber'])
-
-#         if shareholder_id != company_id:
-#             G.add_node(shareholder_id, type='Shareholder')
-#             G.add_edge(shareholder_id, company_id, relationship='FIRST_LEVEL_SHAREHOLDER_OF')
-
-#     # Step 5: Load controlling shareholders data
-#     print(f"🔍 Loading controlling shareholders data from {controlling_shareholders_csv}...")
-#     controlling_df = pd.read_csv(controlling_shareholders_csv)
-
-#     for _, row in controlling_df.iterrows():
-#         shareholder_id = str(row['cshbvdidnumber'])
-#         company_id = str(row['bvdidnumber'])
-
-#         if shareholder_id != company_id:
-#             G.add_node(shareholder_id, type='Shareholder')
-#             G.add_edge(shareholder_id, company_id, relationship='CONTROLLING_SHAREHOLDER_OF')
-
-#     print("✅ Graph initialization complete. Saving to disk...")
-
-#     # Save the graph to disk
-#     with open(GRAPH_FILE, "wb") as f:
-#         pickle.dump(G, f)
-
-#     print(f"✅ Graph saved as {GRAPH_FILE}")
-#     return G
+import hashlib
 
 GRAPH_FILE = f"procurement_graph.graphml"  # Stored as GraphML for visualization & reusability
 
@@ -125,42 +36,63 @@ def save_graph(G, country_code):
     nx.write_graphml(G, f"procurement_graph_{country_code}.graphml")
     print(f"✅ Graph saved to procurement_graph_{country_code}.graphml")
 
+def generate_procurement_id(row):
+    """
+    Generates a unique procurement ID using a hash of key fields.
+    Ensures uniqueness across multiple runs.
+    """
+    unique_string = f"{row['bvdidnumber']}_{row.get('contract_id', row.name)}"  # Use contract_id if available
+    return f"procurement_{hashlib.md5(unique_string.encode()).hexdigest()[:10]}"  # Short hash
+
+
 def add_procurement_winners(G, country_code, procurement_csv):
     """
     Adds procurement-winning companies to the graph as 'bid_winners' and stores extra node information.
+    Ensures unique procurement IDs and prevents duplicate edges.
     """
     print(f"🔍 Loading procurement data from {procurement_csv}...")
     procurement_df = pd.read_csv(procurement_csv)
 
-    for index, row in procurement_df.iterrows():
+    added_procurements = 0
+    added_edges = 0
+
+    for _, row in procurement_df.iterrows():
         if str(row['WIN_COUNTRY_CODE'])[:2] == country_code:
-            procurement_id = f"procurement_{index}"  # Use index as unique ID
+            procurement_id = generate_procurement_id(row)  # Generate a unique procurement ID
             company_id = str(row['bvdidnumber'])  # Company ID
 
-            # Store full row data as node attributes
-            company_attributes = row.to_dict()
-            company_attributes["type"] = "Company"
-            company_attributes["bid_winner"] = True  # Mark as procurement winner
+            # If procurement does not exist, add it
+            if procurement_id not in G:
+                procurement_attributes = {"type": "Procurement"}
+                G.add_node(procurement_id, **procurement_attributes)
+                added_procurements += 1
 
-            procurement_attributes = {"type": "Procurement"}
+            # Ensure company node exists
+            if company_id not in G:
+                company_attributes = row.to_dict()
+                company_attributes["type"] = "Company"
+                company_attributes["bid_winner"] = True  # Mark as procurement winner
+                G.add_node(company_id, **company_attributes)
 
-            # Add procurement node with full details
-            G.add_node(procurement_id, **procurement_attributes)
+            # Ensure edge exists before adding
+            if not G.has_edge(company_id, procurement_id):
+                G.add_edge(company_id, procurement_id, relationship='WON')
+                added_edges += 1
 
-            # Add company node with full row data
-            G.add_node(company_id, **company_attributes)
-
-            # Create edge: Company won Procurement
-            G.add_edge(company_id, procurement_id, relationship='WON')
-
-    print("✅ Added procurement winners to the graph with full metadata.")
-
-    print("✅ Added procurement winners to the graph.")
+    print(f"✅ Added {added_procurements} new procurements.")
+    print(f"✅ Created {added_edges} new company-procurement edges.")
 
 def add_matching_entities(G, data_csv, source_column, target_column, relationship_type):
     """
     Adds nodes and edges to the graph only if the `source_column` matches an existing node.
+    If `target_column` already exists in the graph, only adds the edge if it doesn’t exist.
     Also stores full row data for each new node.
+
+    :param G: NetworkX graph
+    :param data_csv: CSV file containing the relationships.
+    :param source_column: Column in the CSV that should already exist in the graph.
+    :param target_column: Column that represents the new node to be added.
+    :param relationship_type: Relationship type (e.g., "SHAREHOLDER", "SUBSIDIARY").
     """
     print(f"🔍 Loading {relationship_type} data from {data_csv}...")
     df = pd.read_csv(data_csv)
@@ -169,18 +101,19 @@ def add_matching_entities(G, data_csv, source_column, target_column, relationshi
         source_id = str(row[source_column])
         target_id = str(row[target_column])
 
-        # Only add if the source is already in the graph (ensuring relevant connections)
+        # Only proceed if the source node exists in the graph
         if source_id in G:
-            node_attributes = row.to_dict()  # Store all row data
-            node_attributes["type"] = "Company"
+            # If the target node is not already in the graph, add it with metadata
+            if target_id not in G:
+                node_attributes = row.to_dict()  # Store all row data
+                node_attributes["type"] = "Company"  # Mark it as a company
+                G.add_node(target_id, **node_attributes)
 
-            # Add target node with all available metadata
-            G.add_node(target_id, **node_attributes)
+            # Before adding the edge, check if it already exists
+            if not G.has_edge(source_id, target_id):
+                G.add_edge(source_id, target_id, relationship=relationship_type)
 
-            # Create relationship edge
-            G.add_edge(source_id, target_id, relationship=relationship_type)
-
-    print(f"✅ Added {relationship_type} relationships with metadata.")
+    print(f"✅ {relationship_type} relationships updated. Graph now has {len(G.nodes)} nodes and {len(G.edges)} edges.")
 
 def add_flagged_entities(G, flagged_csv):
     """
@@ -216,9 +149,9 @@ def add_flagged_entities(G, flagged_csv):
                 # ✅ Add connection from flagged person to the company
                 G.add_edge(flagged_id, matched_company, relationship="FLAGGED_LINK")
                 print(f"✅ Linked flagged person {flagged_name} to {matched_company}.")
-        else:
+        # else:
             # 🚫 Ignore flagged entities if they are not linked to anything in the graph
-            print(f"🚫 Ignoring flagged entity {flagged_name} (not linked to any procurement).")
+            # print(f"🚫 Ignoring flagged entity {flagged_name} (not linked to any procurement).")
 
     print(f"✅ Finished tagging flagged entities.")
 
@@ -238,23 +171,36 @@ def expand_graph(G, shareholders_csv, subsidiaries_csv, controlling_shareholders
         print("🔄 Expanding to deeper levels (e.g., shareholders of shareholders)...")
 
         # Expand to shareholders of shareholders
-        add_matching_entities(G, shareholders_csv, "shareholder_bvdid", "ultimate_shareholder_bvdid", "OWNS")
+        add_matching_entities(G, shareholders_csv, "bvdidnumber", "shareholderbvdidnumber", "OWNS")
 
         # Expand to subsidiaries of subsidiaries
-        add_matching_entities(G, subsidiaries_csv, "parent_bvdid", "ultimate_parent_bvdid", "SUBSIDIARY_OF")
+        add_matching_entities(G, subsidiaries_csv, "subsidiarybvdidnumber", "bvdidnumber", "SUBSIDIARY_OF")
 
     print(f"✅ Graph expansion complete (depth={depth}).")
 
-def analyze_flagged_procurements(G, flagged_shareholders):
+def expand_graph_by_type(G, data_csv, entity_type):
     """
-    Identifies procurements won by companies that have at least one flagged shareholder.
+    Expands the graph using a specific dataset type: 'shareholder', 'subsidiary', or 'controlling'.
+    Only adds entities related to procurement winners.
+
+    Parameters:
+        G (networkx.Graph): The graph to expand.
+        data_csv (str): Path to the CSV file to process.
+        entity_type (str): Type of expansion ('shareholder', 'subsidiary', 'controlling').
+
     """
-    flagged_procurements = set()
+    print(f"🔄 Expanding graph with {entity_type.upper()} data from {data_csv}...")
 
-    for shareholder in flagged_shareholders:
-        if G.has_node(shareholder):
-            for company in G.successors(shareholder):  # Shareholder → Company
-                for procurement in G.successors(company):  # Company → Procurement
-                    flagged_procurements.add(procurement)
+    if entity_type == "shareholder":
+        add_matching_entities(G, data_csv, "bvdidnumber", "shareholderbvdidnumber", "OWNS")
 
-    return list(flagged_procurements)
+    elif entity_type == "subsidiary":
+        add_matching_entities(G, data_csv, "subsidiarybvdidnumber", "bvdidnumber", "SUBSIDIARY_OF")
+
+    elif entity_type == "controlling":
+        add_matching_entities(G, data_csv, "bvdidnumber", "guobvdidnumber", "CONTROLS")
+
+    else:
+        raise ValueError(f"❌ Invalid entity type: {entity_type}. Choose 'shareholder', 'subsidiary', or 'controlling'.")
+
+    print(f"✅ Graph expansion complete for {entity_type.upper()}.")
