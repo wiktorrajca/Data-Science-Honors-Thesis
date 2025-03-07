@@ -91,3 +91,27 @@ python main.py --country PL --subsidiary_folder path_to_subsidiaries --sharehold
 
 The system will now generate a **structured procurement fraud detection graph**!
 
+## Dependencies
+
+Ensure you have the following Python packages installed:
+
+- Python 3.6+
+- [pandas](https://pandas.pydata.org/)
+- [numpy](https://numpy.org/)
+- [regex](https://pypi.org/project/regex/)
+- [rapidfuzz](https://pypi.org/project/rapidfuzz/)
+- [tqdm](https://pypi.org/project/tqdm/)
+- [Unidecode](https://pypi.org/project/Unidecode/)
+- [networkx](https://networkx.org/)
+- [pickle](https://docs.python.org/3/library/pickle.html) (built-in)
+- [hashlib](https://docs.python.org/3/library/hashlib.html) (built-in)
+- [argparse](https://docs.python.org/3/library/argparse.html) (built-in)
+- [os](https://docs.python.org/3/library/os.html) (built-in)
+- [glob](https://docs.python.org/3/library/glob.html) (built-in)
+- [multiprocessing](https://docs.python.org/3/library/multiprocessing.html) (built-in)
+
+You can install the required packages using pip:
+
+```bash
+pip install pandas numpy regex rapidfuzz tqdm Unidecode networkx
+
