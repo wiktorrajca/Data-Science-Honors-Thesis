@@ -92,6 +92,9 @@ def add_matching_entities(G, df, source_column, target_column, relationship_type
     If `target_column` already exists in the graph, only adds the edge if it doesn’t exist.
     Also stores full row data for each new node.
     """
+    if len(G) == 0:
+        print("⚠️ Graph is empty. Skipping entity matching.")
+        return
     existing_nodes = set(G.nodes)
     existing_edges = set(G.edges)
     # print(f"Sample nodes in graph: {list(existing_nodes)[:10]}")

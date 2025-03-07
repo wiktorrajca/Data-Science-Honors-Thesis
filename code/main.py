@@ -42,7 +42,9 @@ def process_country(country, procurement_csv_list, first_level_shareholders_csv_
 
     # Step 2: Add procurement winners from multiple datasets
     add_procurements(G, country, procurement_csv_list)
-
+    if len(G) == 0:
+        print("⚠️ Graph is empty. Skipping entity matching.")
+        return
     # Step 3: Expand the graph with multiple ownership datasets
     expand_ownership(G, first_level_shareholders_csv_list, subsidiaries_csv_list, shareholders_csv_list, depth)
 
@@ -96,8 +98,8 @@ def main():
 
     # Retrieve file lists from folders or use defaults
     procurement_csv_list = get_files_from_folder(args.procurement_folder) or [
-        "/Users/wiktorrajca/Documents/GitHub/Data-Science-Honors-Thesis/matcher/output/merged_result_3.csv",
-        "/Users/wiktorrajca/Documents/GitHub/Data-Science-Honors-Thesis/matcher/output/merged_result_1.csv"
+        "/Users/wiktorrajca/Documents/GitHub/Data-Science-Honors-Thesis/code/output/merged_result_3.csv",
+        "/Users/wiktorrajca/Documents/GitHub/Data-Science-Honors-Thesis/code/output/merged_result_1.csv"
     ]
     
     subsidiaries_csv_list = get_files_from_folder(args.subsidiary_folder) or [
@@ -113,7 +115,7 @@ def main():
     ]
 
     flagged_csv_list = get_files_from_folder(args.flagged_folder) or [
-        "/Users/wiktorrajca/Documents/GitHub/Data-Science-Honors-Thesis/matcher/output/flagged_little.csv"
+        "/Users/wiktorrajca/Documents/GitHub/Data-Science-Honors-Thesis/code/output/flagged_little.csv"
     ]
 
     for country in countries:
