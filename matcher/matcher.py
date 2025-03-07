@@ -284,17 +284,25 @@ def merge_tables_on_processed_names(table1_path, table2_path, name_column1='WIN_
         lambda x: pd.Series(preprocess_name(x))
     )
 
+    # Flag short names (3 characters or fewer)
+    table1['is_short'] = table1['processed_name'].apply(lambda x: isinstance(x, str) and len(x) <= 3)
+    table2['is_short'] = table2['processed_name'].apply(lambda x: isinstance(x, str) and len(x) <= 3)
+    
+
     # Precompute name prefixes in Table 2 for optimized letter check
     table2['name_prefix'] = table2['processed_name'].str[:3].str.lower()
 
-    # Drop rows with null processed names from both tables
+    # Drop rows with null or very short processed names from both tables
     table1 = table1.dropna(subset=['processed_name'])
+    table1 = table1[table1['processed_name'].str.len() >= 3]
     table2 = table2.dropna(subset=['processed_name'])
+    table2 = table2[table2['processed_name'].str.len() >= 3]
 
     # Perform exact matching on non-transliterated names
     print("Performing exact match with number check for non-transliterated names...")
-    exact_table1 = table1[~table1['is_transliterated']]
-    exact_table2 = table2[~table2['is_transliterated']]
+    exact_table1 = table1[(~table1['is_transliterated']) | (table1['is_short'])]
+    exact_table2 = table2[(~table2['is_transliterated']) | (table2['is_short'])]
+    
 
     exact_matches = exact_match(
         exact_table1,
@@ -306,7 +314,7 @@ def merge_tables_on_processed_names(table1_path, table2_path, name_column1='WIN_
     )
 
     # Perform fuzzy matching on transliterated names (parallelized)
-    transliterated_table1 = table1[table1['is_transliterated']]
+    transliterated_table1 = table1[(table1['is_transliterated']) & (~table1['is_short'])]
     transliterated_table2 = table2  # Matching against all entries in table2
 
     if not transliterated_table1.empty and not transliterated_table2.empty:

@@ -21,7 +21,7 @@ def load_or_initialize_graph(country_code):
     """
     Loads an existing graph from GraphML if available, otherwise initializes a new one.
     """
-    if os.path.exists(f"procurement_graph"):
+    if os.path.exists(f"procurement_graph_{country_code}.graphml"):
         print(f"✅ Loading existing graph from procurement_graph_{country_code}.graphml...")
         return nx.read_graphml(f"procurement_graph_{country_code}.graphml")
     
@@ -45,13 +45,13 @@ def generate_procurement_id(row):
     return f"procurement_{hashlib.md5(unique_string.encode()).hexdigest()[:10]}"  # Short hash
 
 
-def add_procurement_winners(G, country_code, procurement_csv):
+def add_procurement_winners(G, country_code, procurement_df):
     """
     Adds procurement-winning companies to the graph as 'bid_winners' and stores extra node information.
     Ensures unique procurement IDs and prevents duplicate edges.
     """
-    print(f"🔍 Loading procurement data from {procurement_csv}...")
-    procurement_df = pd.read_csv(procurement_csv)
+    # print(f"🔍 Loading procurement data from {procurement_csv}...")
+    # procurement_df = pd.read_csv(procurement_csv)
 
     added_procurements = 0
     added_edges = 0
@@ -82,48 +82,56 @@ def add_procurement_winners(G, country_code, procurement_csv):
     print(f"✅ Added {added_procurements} new procurements.")
     print(f"✅ Created {added_edges} new company-procurement edges.")
 
-def add_matching_entities(G, data_csv, source_column, target_column, relationship_type):
+def normalize_id(value):
+    """Ensures IDs are stored in a consistent format across runs."""
+    return str(value).strip().lower() if pd.notna(value) else None
+
+def add_matching_entities(G, df, source_column, target_column, relationship_type):
     """
     Adds nodes and edges to the graph only if the `source_column` matches an existing node.
     If `target_column` already exists in the graph, only adds the edge if it doesn’t exist.
     Also stores full row data for each new node.
-
-    :param G: NetworkX graph
-    :param data_csv: CSV file containing the relationships.
-    :param source_column: Column in the CSV that should already exist in the graph.
-    :param target_column: Column that represents the new node to be added.
-    :param relationship_type: Relationship type (e.g., "SHAREHOLDER", "SUBSIDIARY").
     """
-    print(f"🔍 Loading {relationship_type} data from {data_csv}...")
-    df = pd.read_csv(data_csv)
+    existing_nodes = set(G.nodes)
+    existing_edges = set(G.edges)
+    # print(f"Sample nodes in graph: {list(existing_nodes)[:10]}")
 
     for _, row in df.iterrows():
-        source_id = str(row[source_column])
-        target_id = str(row[target_column])
-
-        # Only proceed if the source node exists in the graph
-        if source_id in G:
+        source_id = row[source_column]
+        target_id = row[target_column]
+        # Skip invalid target IDs
+        if pd.isna(row[target_column]):
+            # print(f"⚠️ Skipping row: target_id is NaN for source {source_id}")
+            continue
+        # Only proceed if the source node exists
+        if source_id in existing_nodes and G.nodes[source_id].get("bid_winner") == True: #don't include and if we want to match subsidiaries of subsidiaries etc.
             # If the target node is not already in the graph, add it with metadata
-            if target_id not in G:
+            if target_id not in existing_nodes:
                 node_attributes = row.to_dict()  # Store all row data
-                node_attributes["type"] = "Company"  # Mark it as a company
+                node_attributes["type"] = "Company"
                 G.add_node(target_id, **node_attributes)
 
-            # Before adding the edge, check if it already exists
-            if not G.has_edge(source_id, target_id):
+                # Update hash set
+                existing_nodes.add(target_id)
+
+            # Check if an edge with the **same relationship type** already exists
+            if (source_id, target_id) not in existing_edges:
                 G.add_edge(source_id, target_id, relationship=relationship_type)
+
+                # Update hash set
+                existing_edges.add((source_id, target_id))
 
     print(f"✅ {relationship_type} relationships updated. Graph now has {len(G.nodes)} nodes and {len(G.edges)} edges.")
 
-def add_flagged_entities(G, flagged_csv):
+def add_flagged_entities(G, df):
     """
     Tags flagged entities that already exist in the graph and adds necessary edges.
     
     :param G: NetworkX graph
     :param flagged_csv: Path to CSV containing flagged individuals/entities
     """
-    print(f"🔍 Tagging flagged entities in the graph (no new nodes)...")
-    df = pd.read_csv(flagged_csv)
+    # print(f"🔍 Tagging flagged entities in the graph (no new nodes)...")
+    # df = pd.read_csv(flagged_csv)
 
     for _, row in df.iterrows():
         flagged_id = str(row["id"])  # ID of flagged entity
@@ -189,7 +197,7 @@ def expand_graph_by_type(G, data_csv, entity_type):
         entity_type (str): Type of expansion ('shareholder', 'subsidiary', 'controlling').
 
     """
-    print(f"🔄 Expanding graph with {entity_type.upper()} data from {data_csv}...")
+    print(f"🔄 Expanding graph with {entity_type.upper()}") #data from {data_csv}...
 
     if entity_type == "shareholder":
         add_matching_entities(G, data_csv, "bvdidnumber", "shareholderbvdidnumber", "OWNS")

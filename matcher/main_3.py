@@ -1,6 +1,7 @@
 import argparse
 import os
 import glob
+import pandas as pd
 from graph_builder import (
     load_or_initialize_graph, 
     save_graph, 
@@ -15,18 +16,22 @@ def add_procurements(G, country, procurement_csv_list):
     Adds procurement winners from multiple procurement datasets before expanding the graph.
     """
     for procurement_csv in procurement_csv_list:
-        add_procurement_winners(G, country, procurement_csv)
+        procurement_df = pd.read_csv(procurement_csv)
+        add_procurement_winners(G, country, procurement_df)
 
 def expand_ownership(G, first_level_shareholders_csv_list, subsidiaries_csv_list, shareholders_csv_list, depth=1):
     """
     Expands the graph multiple times using multiple shareholder & subsidiary datasets.
     """
     for first_level_shareholders_csv in first_level_shareholders_csv_list:
-        expand_graph_by_type(G, first_level_shareholders_csv, "shareholder")
+        first_level_shareholders_df = pd.read_csv(first_level_shareholders_csv)
+        expand_graph_by_type(G, first_level_shareholders_df, "shareholder")
     for subsidiaries_csv in subsidiaries_csv_list:
-        expand_graph_by_type(G, subsidiaries_csv, "subsidiary")
+        subsidiaries_df = pd.read_csv(subsidiaries_csv)
+        expand_graph_by_type(G, subsidiaries_df, "subsidiary")
     for shareholders_csv in shareholders_csv_list:
-        expand_graph_by_type(G, shareholders_csv, "controlling")
+        shareholders_df = pd.read_csv(shareholders_csv)
+        expand_graph_by_type(G, shareholders_df, "controlling")
 
 def process_country(country, procurement_csv_list, first_level_shareholders_csv_list, subsidiaries_csv_list, shareholders_csv_list, flagged_csv_list, depth=1):
     """
@@ -43,7 +48,8 @@ def process_country(country, procurement_csv_list, first_level_shareholders_csv_
 
     # Step 4: Add flagged entities (ONLY IF THEY EXIST IN THE GRAPH)
     for flagged_csv in flagged_csv_list:
-        add_flagged_entities(G, flagged_csv)
+        flagged_df = pd.read_csv(flagged_csv)
+        add_flagged_entities(G, flagged_df)
 
     # Step 5: Save the updated graph
     save_graph(G, country)
@@ -90,10 +96,10 @@ def main():
 
     # Retrieve file lists from folders or use defaults
     procurement_csv_list = get_files_from_folder(args.procurement_folder) or [
-        "/Users/wiktorrajca/Documents/GitHub/Data-Science-Honors-Thesis/matcher/output/merged_result_3.csv"
+        "/Users/wiktorrajca/Documents/GitHub/Data-Science-Honors-Thesis/matcher/output/merged_result_3.csv",
+        "/Users/wiktorrajca/Documents/GitHub/Data-Science-Honors-Thesis/matcher/output/merged_result_1.csv"
     ]
-    # "/Users/wiktorrajca/Documents/GitHub/Data-Science-Honors-Thesis/matcher/output/merged_result_1.csv"
-
+    
     subsidiaries_csv_list = get_files_from_folder(args.subsidiary_folder) or [
         "/Users/wiktorrajca/Desktop/Research/URAP_Fedyk/data/Orbis_Data/subsidiaries_first_level1.csv"
     ]
