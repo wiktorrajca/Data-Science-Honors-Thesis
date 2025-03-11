@@ -1,4 +1,4 @@
-# Procurement Fraud Detection - README
+# Procurement Corruption Detection - README
 
 ## Overview
 This project aims to detect procurement fraud by integrating public procurement data (TED), corporate ownership structures (Orbis), and sanction lists into a **graph-based detection system**. The system:
