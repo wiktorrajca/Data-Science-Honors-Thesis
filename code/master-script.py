@@ -63,10 +63,10 @@ def get_orbis_files(orbis_dir):
 
 def main():
     parser = argparse.ArgumentParser(description="Master script for procurement fraud detection graph.")
-    parser.add_argument("--ted_data", type=str, default="/disk/homedirs/nber/tder/bulk/procurement/data/intermediate/", help="Path to TED procurement dataset.")
-    parser.add_argument("--sanction_data", type=str, default="/disk/homedirs/nber/tder/bulk/procurement/data/intermediate/", help="Path to sanctioned entities dataset.")
+    parser.add_argument("--ted_data", type=str, default="/disk/homedirs/nber/tder/bulk/procurement/data/intermediate/export_CAN_2019.csv", help="Path to TED procurement dataset.")
+    parser.add_argument("--sanction_data", type=str, default="/disk/homedirs/nber/tder/bulk/procurement/data/intermediate/open_sanctions.csv", help="Path to sanctioned entities dataset.")
     parser.add_argument("--orbis_dir", type=str, default="/disk/homedirs/nber/tder/bulk/procurement/data/intermediate/ORBIS", help="Directory containing Orbis firm datasets.")
-    parser.add_argument("--country", type=str, default="PL", help="Specify for which country you want to create graphs for")
+    parser.add_argument("--country", type=str, default="", help="Specify for which country you want to create graphs for")
     parser.add_argument("--output_dir", type=str, default="output", help="Directory for merged datasets.")
     args = parser.parse_args()
     
@@ -101,7 +101,7 @@ def main():
     print("✅ Organized Orbis files into folders:", orbis_output_paths)
 
     # Step 4: Run main.py with merged datasets
-    run_main("/Users/wiktorrajca/Documents/GitHub/Data-Science-Honors-Thesis/code/output_test/TED", args.country, orbis_output_paths["shareholders"], orbis_output_paths["subsidiaries"], orbis_output_paths["controlling"], "/Users/wiktorrajca/Documents/GitHub/Data-Science-Honors-Thesis/code/output_test/Sanctions")
+    run_main(merged_ted_path, args.country, orbis_output_paths["shareholders"], orbis_output_paths["subsidiaries"], orbis_output_paths["controlling"], merged_sanction_path)
 
 if __name__ == "__main__":
     main()
