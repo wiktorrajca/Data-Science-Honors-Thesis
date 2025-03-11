@@ -47,6 +47,7 @@ You can install the required packages using pip:
 
 ```bash
 pip install pandas numpy regex rapidfuzz tqdm Unidecode networkx
+```
 
 ---
 ## Data Sources
