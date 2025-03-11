@@ -1,96 +1,28 @@
-# **Procurement Fraud Detection Graph**
+# Procurement Fraud Detection - README
 
-## **Overview**
+## Overview
+This project aims to detect procurement fraud by integrating public procurement data (TED), corporate ownership structures (Orbis), and sanction lists into a **graph-based detection system**. The system:
 
-This system constructs a **network graph** of procurement winners and their ownership structures using various datasets, including procurement data, company ownership information, and sanctioned entity lists. The graph helps analyze relationships and detect potential fraud.
+- **Matches procurement award data (TED) with corporate records (Orbis)** to link procurement winners to their corporate structures.
+- **Matches sanctioned entities with Orbis** to flag high-risk companies.
+- **Builds a graph representation** of procurement fraud risk, incorporating first-level shareholders, subsidiaries, and controlling shareholders.
+- **Outputs a structured graph** for analysis of fraud patterns and collusion risks.
 
-## **Usage Instructions**
+This repository contains:
+- **`master-script.py`** (Main driver script that processes and organizes the data.)
+- **`matcher.py`** (Matches procurement/sanction data with Orbis firm records.)
+- **`main.py`** (Builds the fraud detection graph.)
 
-### **1. Match Procurement Data with Orbis Data**
+---
+## Installation & Dependencies
 
-To integrate procurement data with Orbis company data, use matcher.py. This process assigns a **BvD ID** to each bid winner if available in Orbis.
-
-#### **Example Command:**
-
-```bash
-python matcher.py --base_file ted_procurement_data.csv --additional_dir orbis_data_folder --output_dir output
+### **1. Clone the Repository**
+```sh
+$ git clone https://github.com/wiktorrajca/Data-Science-Honors-Thesis.git
 ```
 
-- Ensure that **TED procurement dataset** has a column named `WIN_COUNTRY_CODE`.
-- The output will be a **procurement CSV** with mapped BvD IDs.
-
-### **2. Match Sanctioned Lists with Orbis Data**
-
-To integrate sanctioned entities with Orbis data, use matcher.py.
-
-#### **Example Command:**
-
-```bash
-python matcher.py --base_file sanctioned_list.csv --additional_dir orbis_data_folder --output_dir output --name_column1 sanctioned_name_column
-```
-
-- Specify the **column containing names of sanctioned entities** using `--name_column1`.
-- The output will be a **sanctioned list CSV** with mapped BvD IDs.
-
-### **3. Organizing Ownership Datasets**
-
-The system uses different datasets for company ownership structures:
-
-- **Subsidiaries dataset** (`subsidiaries.csv`)
-- **Basic shareholders dataset** (`basic_shareholders.csv`)
-- **First-level shareholders dataset** (`first_level_shareholders.csv`)
-- **(Not used) Controlling shareholders dataset** – ownership control is inferred from `basic_shareholders.csv`.
-
-### **4. Generate the Graph with main.py **
-
-To construct the graph, run main.py.
-
-#### **Command Format:**
-
-```bash
-python main.py --country PL FR --subsidiary_folder path_to_subsidiaries --shareholder_folder path_to_basic_shareholders --first_level_shareholders_folder path_to_first_level_shareholders
-```
-
-- ``: Specify one or multiple country codes (e.g., PL DE FR). If omitted, graphs are generated for all countries.
-- ``: Path to folder containing subsidiary datasets.
-- ``: Path to folder containing basic shareholder datasets.
-- ``: Path to folder containing first-level shareholder datasets.
-
-The system will:
-
-1. **Load or initialize a graph** for each country.
-2. **Add procurement winners** from procurement datasets.
-3. **Expand the ownership structure** using different shareholder datasets.
-4. **Add flagged entities** (sanctioned companies/individuals that match an entity in the graph).
-5. **Save the graph** for future use.
-
-### **5. Graph Output Format**
-
-- The graphs are stored in **GraphML format** (`.graphml` files).
-- Each node in the graph contains metadata from the datasets.
-- **Edges represent relationships** such as `WON`, `OWNS`, `CONTROLLS` and `SUBSIDIARY_OF`.
-
-## **Notes & Recommendations**
-
-- **Ensure dataset formatting is correct** before running the scripts.
-- **Run **matcher.py** before **`` to assign BvD IDs properly.
-- **Graphs grow over time**, so the system is designed to prevent duplicate entries when re-running the scripts.
-
-### **Example Workflow**
-
-```bash
-# Step 1: Match Procurement Data
-python matcher.py --base_file ted_procurement_data.csv --additional_dir orbis_data_folder --output_dir output
-
-# Step 2: Match Sanctioned Lists
-python matcher.py --base_file sanctioned_list.csv --additional_dir orbis_data_folder --output_dir output --name_column1 sanctioned_name_column
-
-# Step 3: Generate Graph for Poland
-python main.py --country PL --subsidiary_folder path_to_subsidiaries --shareholder_folder path_to_basic_shareholders --first_level_shareholders_folder path_to_first_level_shareholders
-```
-
-The system will now generate a **structured procurement fraud detection graph**!
-
+### **2. Install Required Dependencies**
+Ensure you have **Python 3.7+** installed.
 ## Dependencies
 
 Ensure you have the following Python packages installed:
@@ -109,9 +41,96 @@ Ensure you have the following Python packages installed:
 - [os](https://docs.python.org/3/library/os.html) (built-in)
 - [glob](https://docs.python.org/3/library/glob.html) (built-in)
 - [multiprocessing](https://docs.python.org/3/library/multiprocessing.html) (built-in)
+- [shutil] (https://docs.python.org/3/library/shutil.html) (built-in)
 
 You can install the required packages using pip:
 
 ```bash
 pip install pandas numpy regex rapidfuzz tqdm Unidecode networkx
+
+---
+## Data Sources
+This pipeline relies on:
+- **TED Procurement Data** (`export_CAN_2019.csv`): Contains contract awards and winning firms.
+- **Sanctions Data** (`open_sanctions.csv`): List of sanctioned entities.
+- **Orbis Data**: Corporate records, including ownership structures.
+  - `BvD_ID_and_Name files`: Firm identifier dataset.
+  - `shareholders_first_level files`: First-level shareholders.
+  - `subsidiaries_first_level1 files`: Subsidiaries.
+  - `basic_shareholder_info1 files`: Controlling shareholders.
+  We assume that all Orbis files are inside the same folder
+
+---
+## Running the Pipeline
+
+### **1. Run the Master Script**
+This script will:
+- Match procurement data with Orbis records.
+- Match sanction data with Orbis records.
+- Organize Orbis files into structured folders.
+- Execute `main.py` to build the fraud detection graph.
+
+### **2. For Professor Deryugina:**
+Given the directory structure we have disccused and assuming open_sanctions.csv is in the same directory as TED data please run:
+```sh
+python3 master-script.py
+```
+
+#### **Command Example:**
+```sh
+python3 master-script.py \
+    --ted_data data/TED/export_CAN_2019.csv \
+    --sanction_data data/Sanctions/open_sanctions.csv \
+    --orbis_dir data/Orbis \
+    --output_dir output
+```
+
+### **2. Expected Output Directory Structure**
+Once execution is complete, `output/` will contain the processed datasets:
+```
+output/
+│── TED/  # Matched procurement data
+│── Sanctions/  # Matched sanction data
+│── shareholders/  # Organized shareholder files
+│── subsidiaries/  # Organized subsidiary files
+│── controlling/  # Organized controlling shareholder files
+graph_output/  # Final graph files
+```
+
+---
+## Explanation of Scripts
+
+### **1. `master-script.py`**
+- **Finds TED, sanction, and Orbis data**
+- **Runs `matcher.py`** to match TED and sanction data with Orbis
+- **Organizes Orbis files** into separate directories
+- **Runs `main.py`** with all processed files
+
+### **2. `matcher.py`**
+- **Matches procurement/sanctions with Orbis** using company names and fuzzy matching.
+- **Uses `rapidfuzz` for approximate matching.**
+
+### **3. `main.py`**
+- **Constructs a corruption detection graph.**
+- **Uses NetworkX** to model firms, ownership links, and flagged entities.
+- **Outputs the corruption risk network for analysis.**
+
+---
+## Debugging & Logs
+- If an error occurs, check which step failed:
+  - **Matcher failing?** Check if TED and Orbis files exist in the expected format.
+  - **Graph construction failing?** Ensure all matched datasets exist before running `main.py`.
+- **Enable debug logs:** Modify `print` statements inside scripts to print more details.
+
+---
+## Future Improvements
+- **Expand to more datasets** (e.g., additional corporate registries, more procurement datasets).
+- **Optimize graph creation per country**
+- **Optimize graph performance** (reduce memory usage for large datasets).
+
+---
+## Author
+**Wiktor Rajca** - UC Berkeley - Data Science Honors Thesis
+
+For questions or contributions, feel free to open an issue or contact via email.
 
