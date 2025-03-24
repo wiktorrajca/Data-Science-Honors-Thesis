@@ -57,7 +57,7 @@ def add_procurement_winners(G, country_code, procurement_df):
     added_edges = 0
 
     for _, row in procurement_df.iterrows():
-        if str(row['WIN_COUNTRY_CODE'])[:2] == country_code or str(row['WIN_COUNTRY_CODE'])[:2] != country_code: #delete the other part if you want graphs for specific countries
+        if str(row['win_country_code'])[:2] == country_code or str(row['win_country_code'])[:2] != country_code: #delete the other part if you want graphs for specific countries
             procurement_id = generate_procurement_id(row)  # Generate a unique procurement ID
             company_id = str(row['bvdidnumber'])  # Company ID
 
