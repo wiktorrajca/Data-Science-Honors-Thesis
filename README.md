@@ -11,19 +11,22 @@ This repository contains a full end-to-end data pipeline for processing public p
 3. [Screening Service Setup](#screening-service-setup)
 4. [Installation](#installation)
 5. [Directory Structure](#directory-structure)
-6. [Pipeline Components](#pipeline-components)
-7. [Running the Pipeline](#running-the-pipeline)
-8. [Command-Line Arguments](#command-line-arguments)
-9. [Outputs](#outputs)
-10. [Post-Pipeline Analysis](#post-pipeline-analysis)
-11. [Examples](#examples)
-12. [Troubleshooting](#troubleshooting)
+6. [Data Description and Folder Layout](#data-description-and-folder-layout)
+7. [Pipeline Components](#pipeline-components)
+8. [Running the Pipeline](#running-the-pipeline)
+9. [Command-Line Arguments](#command-line-arguments)
+10. [Outputs](#outputs)
+11. [Post-Pipeline Analysis](#post-pipeline-analysis)
+12. [Examples](#examples)
+13. [Troubleshooting](#troubleshooting)
 
 ## Overview
 
 ## Screening Service Setup
 
-This project uses [OpenSanctions Yente](https://opensanctions.org/) as the backend screening API. Below are instructions to deploy Yente and its Elasticsearch backend via Docker, giving you a local screening service exposing `/search`, `/match`, `/update`, and related endpoints. You will then point the pipeline’s screening step (`screening.py`) at this service.
+This project uses [OpenSanctions Yente](https://opensanctions.org/) as the backend screening API.
+
+> For more information on Yente, see the official docs: [https://www.opensanctions.org/docs/yente/](https://www.opensanctions.org/docs/yente/) Below are instructions to deploy Yente and its Elasticsearch backend via Docker, giving you a local screening service exposing `/search`, `/match`, `/update`, and related endpoints. You will then point the pipeline’s screening step (`screening.py`) at this service.
 
 ### Table of Contents
 
@@ -188,10 +191,12 @@ curl -X POST http://localhost:8000/update \
 * **Index `yente-entities` does not exist**: Wait for indexing to complete.
 * **Memory errors**: Adjust `ES_JAVA_OPTS`.
 * **404 on `/match/<scope>`**: Ensure your manifest includes that scope.
-* **Connection issues**:
+* **Connection issues**: Confirm Elasticsearch is reachable from the Yente container:
 
+  ````bash
+  docker exec yente-app curl -s http://index:9200
   ```bash
-  ```
+  ````
 
 docker exec yente-app curl -s [http://index:9200](http://index:9200)
 
@@ -257,19 +262,14 @@ pip install pandas numpy networkx rapidfuzz tqdm requests scipy regex
 1. Clone the repository:
 
    ```bash
+   git clone https://github.com/your-org/procurement-pipeline.git
+   cd procurement-pipeline
    ```
+2. Ensure dependencies are installed (see Prerequisites above):
 
-git clone [https://github.com/your-org/procurement-pipeline.git](https://github.com/your-org/procurement-pipeline.git)
-cd procurement-pipeline
-
-````
-2. Ensure dependencies are installed (see Prerequisites).
-3. Make the main script executable:
-```bash
-chmod +x main.py
-````
-
----
+   ```bash
+   pip install pandas numpy networkx rapidfuzz tqdm requests scipy regex
+   ```
 
 ## Directory Structure
 
@@ -284,6 +284,59 @@ chmod +x main.py
 ├── main.py                     # Pipeline orchestrator
 └── README.md                   # This documentation
 ```
+
+---
+
+## Data Description and Folder Layout
+
+This section describes the expected input files and their key columns. Note: **Orbis (BvD) data is proprietary and cannot be shared**; TED procurement data can be downloaded from the TED portal (link to be added).
+
+### Base File (TED Procurement Notice)
+
+* Located at: `--base-file`
+* Format: CSV
+* Key columns include (but not limited to):
+
+  * `ID_NOTICE_CAN`, `TED_NOTICE_URL`, `YEAR`, `ID_TYPE`, `DT_DISPATCH`, `XSD_VERSION`, `CANCELLED`, `CORRECTIONS`
+  * `CAE_NAME`, `CAE_NATIONALID`, `CAE_ADDRESS`, `CAE_TOWN`, `CAE_POSTAL_CODE`
+  * `ISO_COUNTRY_CODE`, `ISO_COUNTRY_CODE_GPA`, `ISO_COUNTRY_CODE_ALL`
+  * `VALUE_EURO`, `VALUE_EURO_FIN_1`, `VALUE_EURO_FIN_2`, `AWARD_EST_VALUE_EURO`, `AWARD_VALUE_EURO`, `AWARD_VALUE_EURO_FIN_1`
+  * `WIN_NAME`, `WIN_NATIONALID`, `WIN_ADDRESS`, `WIN_TOWN`, `WIN_POSTAL_CODE`, `WIN_COUNTRY_CODE`
+  * `NUMBER_OFFERS`, `NUMBER_TENDERS_SME`, `NUMBER_TENDERS_OTHER_EU`, `NUMBER_TENDERS_NON_EU`, `NUMBER_OFFERS_ELECTR`
+  * `DT_AWARD` and other procurement metadata columns
+
+### Additional Directory (BvD IDs and Names)
+
+* Located at: `--additional-dir`
+* Files prefixed `BvD_ID_and_Name*`.csv
+* Key columns:
+
+  * `bvdidnumber` (string)
+  * `name` (string)
+
+### Shareholders Folder
+
+* Located at: `--shareholders-folder`
+* Contains one or more CSVs with corporate shareholder info
+* Key columns:
+
+  * `bvdidnumber`, `shareholdername`, `shareholderbvdidnumber`, `shareholdercountryisocode`, `shareholderdirect`, `shareholdertotal`, plus additional metadata columns like `shareholdertype`, `shareholderinformationdate`, etc.
+
+### Subsidiaries Folder
+
+* Located at: `--subsidiaries-folder`
+* Contains one or more CSVs with subsidiary relationships
+* Key columns:
+
+  * `bvdidnumber`, `subsidiaryname`, `subsidiarybvdidnumber`, `subsidiarycountryisocode`, `subsidiarydirect`, `subsidiarytotal`, plus additional columns such as `subsidiarytype`, `subsidiarystatus`, `subsidiaryinformationdate`, etc.
+
+### Basic Shareholders Folder
+
+* Located at: `--basic-shareholders-folder`
+* Contains CSV(s) with basic shareholder group metrics
+* Key columns include:
+
+  * `bvdidnumber`, `noofcompaniesincorporategroup`, `noofrecordedshareholders`, `noofrecordedsubsidiaries`, `ishfirstname`, `ishbvdidnumber`, `ishdirect`, `ishtotal`, as well as ultimate ownership fields like `guoname`, `guobvdidnumber`, `guodirect`, `guototal`, and duo fields `duoname`, `duodirect`, `duototal`, etc.
 
 ---
 
@@ -487,4 +540,4 @@ python diagnostic_report.py \
 
 ---
 
-*For questions or support, please contact the dev team or open an issue on the repository.*
+*For questions or support, please contact Wiktor Rajca w_rajca@berkeley.edu or open an issue on the repository.*
